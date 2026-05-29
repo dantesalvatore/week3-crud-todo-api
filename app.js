@@ -12,9 +12,36 @@ app.get('/todos', (req, res) => {
   res.status(200).json(todos); // Send array as JSON
 });
 
+    // Get a SINGLE todo by ID using a URL parameter (:id)
+    app.get('/todos/:id', (req, res) => {
+    const todoId = parseInt(req.params.id);
+    const todo = todos.find(t => t.id === todoId);
+
+    if (!todo) {
+        return res.status(404).json({ message: "Todo not found" });
+    }
+    res.status(200).json(todo);
+});
+
 // POST New – Create
 app.post('/todos', (req, res) => {
-  const newTodo = { id: todos.length + 1, ...req.body }; // Auto-ID
+  const { task, completed = false } = req.body;
+
+  // 1. VALIDATION CHECK
+  // Checks if 'task' is missing, an empty string, or just spaces
+  if (!task || task.trim() === "") {
+    return res.status(400).json({
+      status: "error",
+      message: "The 'task' field is required and cannot be empty."
+    });
+  }
+
+  const newTodo = {
+    id: todos.length + 1,
+    task: task.trim(),
+    completed,
+  };
+
   todos.push(newTodo);
   res.status(201).json(newTodo); // Echo back
 });
